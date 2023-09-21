@@ -2,10 +2,10 @@
 
 ### Dependencias
 
-pip install cachetools
+pip install cachetools </br>
 pip install grpcio-tools
 
 ### Execução
 
-python3 server.py
+python3 server.py </br>
 python3 cliente.py
