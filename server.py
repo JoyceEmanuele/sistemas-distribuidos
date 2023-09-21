@@ -121,6 +121,61 @@ class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
             print(self.cache)
             return resposta
         else: print("chave não existe")
+    
+    def GetRange(self, request, context):
+        print("GetRange")
+
+        chavefr = request.fr.key
+        chaveto = request.to.key
+        versaofr = request.fr.ver
+        versaoto = request.to.ver
+
+        if versaofr >= versaoto: versao = versaofr
+        else: versao = versaoto
+
+        chaves_ordenadas = sorted(self.cache.keys())
+        print(chaves_ordenadas)
+
+        respostas = []
+
+        for chave in chaves_ordenadas:
+            if chave >= chavefr and chave <= chaveto:
+                valores = self.cache[chave]
+                if not versao: 
+                    resposta = project_pb2.KeyValueVersionReply(
+                         key=chave, val=valores[-1][0], ver=valores[-1][1]
+                        )
+                    respostas.append(resposta)
+                else: 
+                    for valor, valor_versao in reversed(valores):
+                        if valor_versao <= versao:
+                            resposta = project_pb2.KeyValueVersionReply(
+                            key=chave, val=valor, ver=valor_versao
+                            )
+                            respostas.append(resposta)
+        
+        return iter(respostas)
+    
+    def DelRange(self, request, context):
+        print("DelRange")
+
+        chavefr = request.fr.key
+        chaveto = request.to.key
+
+        chaves_ordenadas = sorted(self.cache.keys())
+        print(chaves_ordenadas)
+
+        respostas = []
+
+        for chave in chaves_ordenadas:
+            if chave >= chavefr and chave <= chaveto:
+                mensagem = project_pb2.KeyRequest(key=chave)
+                resposta = self.Del(mensagem,context)
+                respostas.append(resposta)
+
+        print(self.cache)
+        
+        return iter(respostas)
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
