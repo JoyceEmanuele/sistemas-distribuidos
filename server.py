@@ -41,6 +41,87 @@ class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
             print(self.cache)
 
         return resposta
+    
+    def Get(self, request, context):
+        print("get")
+        chave = request.key
+        if chave in self.cache:
+            valores = self.cache[chave]
+            if(request.ver): 
+                versao = request.ver
+                for valor, valor_versao in reversed(valores):
+                    if valor_versao <= versao:
+                        valor_final = valor
+                        versao = valor_versao
+                        break
+            else:
+                versao = valores[-1][1]
+                valor_final = valores[-1][0]
+            
+            resposta = project_pb2.KeyValueVersionReply(
+                key=chave, val=valor_final, ver=versao
+            )
+            
+            return resposta
+                
+        else: print("chave não existe")
+
+    def Del(self, request, context):
+        print("get")
+        chave = request.key
+        if chave in self.cache:
+            valores = self.cache[chave]
+            versao = valores[-1][1]
+            valor = valores[-1][0]
+            resposta = project_pb2.KeyValueVersionReply(
+                key=chave, val=valor, ver=versao
+            )
+            del self.cache[chave]
+            print(self.cache)
+            return resposta
+        else: print("chave não existe")
+
+    def PutAll(self, request, context):
+        print("PutAll")
+        respostas = []
+        for tupla in request:
+            res = self.Put(tupla,context)
+            respostas.append(res)
+        print(self.cache)
+        return iter(respostas)
+    
+    def GetAll(self, request, context):
+        print("GetAll")
+        respostas = []
+        for tupla in request:
+            res = self.Get(tupla,context)
+            respostas.append(res)
+        print(self.cache)
+        return iter(respostas)
+    
+    def DelAll(self, request, context):
+        print("DelAll")
+        respostas = []
+        for tupla in request:
+            res = self.Del(tupla,context)
+            respostas.append(res)
+        print(self.cache)
+        return iter(respostas)
+    
+    def Trim(self, request, context):
+        chave = request.key
+        if chave in self.cache:
+            valores = self.cache[chave]
+            self.cache[chave] = [valores[-1]]
+            versao = valores[-1][1]
+            valor = valores[-1][0]
+            resposta = project_pb2.KeyValueVersionReply(
+                    key=chave, val=valor, ver=versao
+                )
+            print(self.cache)
+            return resposta
+        else: print("chave não existe")
+
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     project_pb2_grpc.add_KeyValueStoreServicer_to_server(
