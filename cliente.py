@@ -2,152 +2,239 @@ import grpc
 import project_pb2
 import project_pb2_grpc
 
-def Put(mensagem):
+def Put(message):
     channel = grpc.insecure_channel('localhost:50051')
     stub = project_pb2_grpc.KeyValueStoreStub(channel)
-    resposta = stub.Put(mensagem)
-    return resposta
+    response = stub.Put(message)
+    return response
 
-def Get(mensagem):
+def Get(message):
     channel = grpc.insecure_channel('localhost:50051')
     stub = project_pb2_grpc.KeyValueStoreStub(channel)
-    resposta = stub.Get(mensagem)
-    return resposta
+    response = stub.Get(message)
+    return response
 
-def Del(mensagem):
+def Del(message):
     channel = grpc.insecure_channel('localhost:50051')
     stub = project_pb2_grpc.KeyValueStoreStub(channel)
-    resposta = stub.Del(mensagem)
-    return resposta
+    response = stub.Del(message)
+    return response
 
-def PutAll(mensagem):
+def PutAll(message):
     channel = grpc.insecure_channel('localhost:50051')
     stub = project_pb2_grpc.KeyValueStoreStub(channel)
-    resposta = list(stub.PutAll(iter(mensagem)))
-    return resposta
+    response = list(stub.PutAll(iter(message)))
+    return response
 
-def GetAll(mensagem):
+def GetAll(message):
     channel = grpc.insecure_channel('localhost:50051')
     stub = project_pb2_grpc.KeyValueStoreStub(channel)
-    resposta = list(stub.GetAll(iter(mensagem)))
-    return resposta
+    response = list(stub.GetAll(iter(message)))
+    return response
 
-def DelAll(mensagem):
+def DelAll(message):
     channel = grpc.insecure_channel('localhost:50051')
     stub = project_pb2_grpc.KeyValueStoreStub(channel)
-    resposta = list(stub.DelAll(iter(mensagem)))
-    return resposta
+    response = list(stub.DelAll(iter(message)))
+    return response
 
-def Trim(mensagem):
+def Trim(message):
     channel = grpc.insecure_channel('localhost:50051')
     stub = project_pb2_grpc.KeyValueStoreStub(channel)
-    resposta = stub.Trim(mensagem)
-    return resposta
+    response = stub.Trim(message)
+    return response
 
-def GetRange(mensagem):
+def GetRange(message):
     channel = grpc.insecure_channel('localhost:50051')
     stub = project_pb2_grpc.KeyValueStoreStub(channel)
-    resposta = list(stub.GetRange(mensagem))
-    return resposta
+    response = list(stub.GetRange(message))
+    return response
 
-def DelRange(mensagem):
+def DelRange(message):
     channel = grpc.insecure_channel('localhost:50051')
     stub = project_pb2_grpc.KeyValueStoreStub(channel)
-    resposta = list(stub.DelRange(mensagem))
-    return resposta
+    response = list(stub.DelRange(message))
+    return response
+
+def getKeyAndValueFromUser():
+    key = input('Input the key: ')
+    value = input('Input the value: ')
+    return (key, value)
+
+def getKeyFromUser():
+    key = input('Input the key: ')
+    return key
+
+def getManyKeysFromUser():
+    key = input('Input the keys separated by space: ')
+    return list(key.split(' '))
+
+def getManyKeysAndVersionsFromUser():
+    keys = input('Input the keys separated by space: ')
+    keys = list(keys.split(' '))
+    version = input('Input the versions separated by space (use -1 to last version): ')
+    version = list(version.split(' '))
+    
+    if(len(keys) != len(version)):
+        raise ValueError('Number of keys must be equal number of version.')
+    
+    for value in version:
+        try:
+            int_value = int(value)
+            if int_value < -1 or int_value == 0:
+                raise ValueError('Number of versions must be -1 to last version or an natural number')
+        except ValueError:
+            print("One or more versions inputed are not numbers")
+
+    
+    keysAndVersion = list(zip(keys, list(map(lambda e: int(e), version))))
+    return keysAndVersion
+
+def getManyKeysAndValuesFromUser():
+    keys = input('Input the keys separated by space: ')
+    keys = list(keys.split(' '))
+    values = input('Input the values separated by space: ')
+    values = list(values.split(' '))
+    
+    if(len(keys) != len(values)):
+        raise ValueError('Number of keys must be equal number of values.')
+    
+    keysAndValues = list(zip(keys, values))
+    return keysAndValues
 
 if __name__ == '__main__':
-    
-    ''' exemplo para testar o get, put, del, putall, getall, delall e trim
-    
-    mensagem = project_pb2.KeyValueRequest(key="chave", val="valor1")
-    resposta = Put(mensagem)
-    mensagem = project_pb2.KeyValueRequest(key="chave", val="valor2")
-    resposta = Put(mensagem)
-    mensagem = project_pb2.KeyValueRequest(key="chave", val="valor3")
-    resposta = Put(mensagem)
-    mensagem = project_pb2.KeyValueRequest(key="chave", val="valor4")
-    resposta = Put(mensagem)
-    mensagem = project_pb2.KeyValueRequest(key="chave1", val="valor1")
-    resposta = Put(mensagem)
-    mensagem = project_pb2.KeyRequest(key="chave")
-    resposta = Get(mensagem)
-    mensagem = project_pb2.KeyRequest(key="chave1")
-    resposta = Del(mensagem)
+    client_request = '-1'
+    while client_request != '10':
+        print('\n ------------------------------------ ')
+        print('|            CLIENT PORTAL             |')
+        print(' ------------------------------------- ')
+        print('|  1. Get                              |')
+        print('|  2. Get Range                        |')
+        print('|  3. Get All                          |')
+        print('|  4. Put                              |')
+        print('|  5. Put All                          |')
+        print('|  6. Del                              |')
+        print('|  7. Del Range                        |')
+        print('|  8. Del All                          |')
+        print('|  9. Trim                             |')
+        print('|  10. Exit                            |')
+        print(' ------------------------------------- ')
+        print('\nChoose an option: ', end='')
+        client_request = input()
+        
+        print()
 
-    steamputall = [];
-    mensagem = project_pb2.KeyValueRequest(key="chave5", val="valor1")
-    steamputall.append(mensagem)
-    mensagem1 = project_pb2.KeyValueRequest(key="chave5", val="valor2")
-    steamputall.append(mensagem1)
-    mensagem2 = project_pb2.KeyValueRequest(key="chave6", val="valor1")
-    steamputall.append(mensagem2)
+        if client_request == '1': # Get
+            key = getKeyFromUser()
+            message = project_pb2.KeyRequest(key=key)
+            response = Get(message)
+            print()
+            print(response)
+        
+        elif client_request == '2': # GetRange
+            try:
+                print('Input two keys and values ​​below')
+                keysAndVersions = getManyKeysAndVersionsFromUser()
+                if(len(keysAndValues) != 2):
+                    print('Number of keys and velues must be 2! OPERATION ABORTED!')
+                    break
+                
+                messageFromTo = []
+                for key, version in keysAndVersions:
+                    if version == -1:
+                        messageFromTo.append(project_pb2.KeyRequest(key=key))
+                    else:
+                        messageFromTo.append(project_pb2.KeyRequest(key=key, ver=version))
+                message = project_pb2.KeyRange(fr=messageFromTo[0], to=messageFromTo[1])
+                response = GetRange(message)
+                print(response)
+            except ValueError as err:
+                print(f'Error: {err}')
+                print('OPERATION ABORTED!')
 
-    resposta = PutAll(steamputall)
-
-    steamgetall = [];
-    mensagem = project_pb2.KeyRequest(key="chave")
-    steamgetall.append(mensagem)
-    mensagem1 = project_pb2.KeyRequest(key="chave5", ver=1)
-    steamgetall.append(mensagem1)
-    mensagem2 = project_pb2.KeyRequest(key="chave6", ver=2)
-    steamgetall.append(mensagem2)
-
-    resposta = GetAll(steamgetall)
-
-    steamdellall = [];
-    #mensagem = project_pb2.KeyRequest(key="chave")
-    #steamdellall.append(mensagem)
-    mensagem1 = project_pb2.KeyRequest(key="chave6")
-    steamdellall.append(mensagem1)
-
-    resposta = DelAll(steamdellall)
-
-    mensagem = project_pb2.KeyRequest(key="chave")
-    resposta = Trim(mensagem)
-
-    print("Resposta do servidor: \n", resposta)
-    '''
-
- #   ''' exemplo para testar o getrange e delrange
-
-    steamputall = [];
-    mensagem9 = project_pb2.KeyValueRequest(key="chave", val="valor1")
-    steamputall.append(mensagem9)
-    mensagem10 = project_pb2.KeyValueRequest(key="chave", val="valor2")
-    steamputall.append(mensagem10)
-    mensagem = project_pb2.KeyValueRequest(key="chave1", val="valor1")
-    steamputall.append(mensagem)
-    mensagem1 = project_pb2.KeyValueRequest(key="chave1", val="valor2")
-    steamputall.append(mensagem1)
-    mensagem2 = project_pb2.KeyValueRequest(key="chave1", val="valor3")
-    steamputall.append(mensagem2)
-    mensagem3 = project_pb2.KeyValueRequest(key="chave2", val="valor1")
-    steamputall.append(mensagem3)
-    mensagem4 = project_pb2.KeyValueRequest(key="chave2", val="valor2")
-    steamputall.append(mensagem4)
-    mensagem7 = project_pb2.KeyValueRequest(key="chave4", val="valor1")
-    steamputall.append(mensagem7)
-    mensagem8 = project_pb2.KeyValueRequest(key="chave4", val="valor2")
-    steamputall.append(mensagem8)
-    mensagem5 = project_pb2.KeyValueRequest(key="chave3", val="valor1")
-    steamputall.append(mensagem5)
-    mensagem6 = project_pb2.KeyValueRequest(key="chave3", val="valor2")
-    steamputall.append(mensagem6)
-
-    resposta = PutAll(steamputall)
-
-    #mensagemfrom = project_pb2.KeyRequest(key="chave1", ver=2)
-    #mensagemto = project_pb2.KeyRequest(key="chave3")
-
-    mensagemfrom = project_pb2.KeyRequest(key="chave1")
-    mensagemto = project_pb2.KeyRequest(key="chave3")
-
-    mensagem = project_pb2.KeyRange(fr=mensagemfrom, to=mensagemto)
-
-    #resposta = GetRange(mensagem)
-    resposta = DelRange(mensagem)
-
-
-    print("Resposta do servidor: \n", resposta)
-#   '''
+        elif client_request == '3': # GetAll
+            steamgetall = [];
+            try:
+                keysAndVersions = getManyKeysAndVersionsFromUser()
+                for key, version in keysAndVersions:
+                    if version == -1:
+                        message = project_pb2.KeyRequest(key=key)
+                    else:
+                        message = project_pb2.KeyRequest(key=key, ver=version)
+                    steamgetall.append(message)
+                response = GetAll(steamgetall)
+                print(response)
+            except ValueError as err:
+                print(f'Error: {err}')
+                print('OPERATION ABORTED!')
+        
+        elif client_request == '4': # Put
+            key, value = getKeyAndValueFromUser()
+            message = project_pb2.KeyValueRequest(key=key, val=value)
+            response = Put(message)
+            print()
+            print(response)
+        
+        elif client_request == '5': # PutAll
+            steamputall = []
+            try:
+                keysAndValues = getManyKeysAndValuesFromUser()
+                for key, value in keysAndValues:
+                    message = project_pb2.KeyValueRequest(key=key, val=value)
+                    steamputall.append(message)
+                response = PutAll(steamputall)
+                print(response)
+            except ValueError as err:
+                print(f'Error: {err}')
+                print('OPERATION ABORTED!')
+        
+        elif client_request == '6': # Del
+            key = getKeyFromUser()
+            message = project_pb2.KeyRequest(key=key)
+            response = Del(message)
+            print()
+            print(response)
+        
+        elif client_request == '7': # Del Range
+            try:
+                print('Input two keys and values ​​below')
+                keysAndVersions = getManyKeysAndVersionsFromUser()
+                if(len(keysAndValues) != 2):
+                    print('Number of keys and velues must be 2! OPERATION ABORTED!')
+                    break
+                
+                messageFromTo = []
+                for key, version in keysAndVersions:
+                    if version == -1:
+                        messageFromTo.append(project_pb2.KeyRequest(key=key))
+                    else:
+                        messageFromTo.append(project_pb2.KeyRequest(key=key, ver=version))
+                message = project_pb2.KeyRange(fr=messageFromTo[0], to=messageFromTo[1])
+                response = DelRange(message)
+                print(response)
+            except ValueError as err:
+                print(f'Error: {err}')
+                print('OPERATION ABORTED!')
+        
+        elif client_request == '8': # Del All
+            steamdelall = []
+            try:
+                keys = getManyKeysFromUser()
+                for key in keys:
+                    message = project_pb2.KeyRequest(key=key)
+                    steamdelall.append(message)
+                response = DelAll(steamdelall)
+                print(response)
+            except ValueError as err:
+                print(f'Error: {err}')
+                print('OPERATION ABORTED!')
+        
+        elif client_request == '9': # Trim
+            key = getKeyFromUser()
+            message = project_pb2.KeyRequest(key=key)
+            response = Trim(message)
+            print()
+            print(response)
+        
+        elif client_request == '10': # Sair
+            exit()
