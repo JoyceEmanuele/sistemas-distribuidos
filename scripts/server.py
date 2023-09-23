@@ -1,5 +1,6 @@
 # grpc and system needed imports
 import sys
+import time
 import grpc
 import project_pb2
 import project_pb2_grpc
@@ -13,8 +14,6 @@ import random
 import logging
 
 from paho.mqtt import client as mqtt_client
-
-
 
 
 # Create an MQTT Connection
@@ -69,6 +68,14 @@ def subscribe(client: mqtt_client):
     client.subscribe(topic)
     client.on_message = on_message
 
+
+def timestamp_in_miliseconds():
+    # Get timestamp in seconds
+    timestamp_in_seconds = time.time()
+    # Convert seconds in miliseconds
+    timestamp_in_miliseconds = int(timestamp_in_seconds * 1000)
+    return timestamp_in_miliseconds
+
 class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
     # def __init__(self):
     #     # Inicialize o cache de tabela hash (substitua o tamanho conforme necessário)
@@ -83,7 +90,7 @@ class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
             print("ta em cache")
             
             valores = cache_dictionary[chave]
-            versao_request = valores[-1][1]+1 if isinstance(valores[-1][1], (int, float)) else 1
+            versao_request = timestamp_in_miliseconds()
             valor_request = valores[-1][0]
 
 
@@ -94,7 +101,7 @@ class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
             print(cache_dictionary)
         else:
             print("não ta em cache")
-            versao_request = 1
+            versao_request = timestamp_in_miliseconds()
             valores = []
             resposta = project_pb2.PutReply(
                 key=chave, old_val="", old_ver=0, ver=versao_request
