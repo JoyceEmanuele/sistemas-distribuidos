@@ -3,7 +3,7 @@
 
 **Aluno 01: Huryel Souto Costa - 12011BCC022**
 
-**Aluno 02: Joyce - XXXXXBCCYYY**
+**Aluno 02: Joyce Emanuele Oliveira Silva - 11721BCC010**
 
 ## **Especificação do Trabalho**
 O projeto segue a seguinte especificação: [especificação.](https://github.com/JoyceEmanuele/sistemas-distribuidos/blob/main/project-specifications.md)
@@ -12,7 +12,7 @@ Ademais, é um projeto desenvolvido pelos alunos supracitados como parte dos req
 # **Etapa 01**
 ## **Instruções de compilação**
 ### **Dependências**
-O projeto foi desenvolvido utilizando a linguagem **Python** na versão **3.8.10**, utilizando o **pip** na versão **23.2.1** e o sistema operacional Linux Mint na versão **20.3**. Outrossim, foram necerrária a instalação de algumas bibliotecas para contruir o projeto, a seguir será descrito os comandos e as bibliotecas utilizadas no processo:
+O projeto foi desenvolvido utilizando a linguagem **Python** na versão **3.8.10**, utilizando o **pip** na versão **23.2.1** e o sistema operacional Linux Mint na versão **20.3**. É necessário, então, que você tenha uma versão similar o mais atualizada para conseguir rodar o projeto. Outrossim, foi necerrária a instalação de algumas bibliotecas para contruir o projeto, a seguir será descrito os comandos e as bibliotecas utilizadas no processo:
 - **Cache Tools**
     ```
     $ pip install cachetools 
@@ -26,28 +26,34 @@ O projeto foi desenvolvido utilizando a linguagem **Python** na versão **3.8.10
     $ ppip3 install paho-mqtt
     ```
     Foi utilizado um broker gratúito, público e online para o MQTT: `broker.emqx.io`
+
+**ATENÇÃO:** é possível instalar o pip e as demais dependências apenas executando o `compile.sh`, na raiz do projeto, através do comando:
+```
+sh compile.sh
+```
+
 ### **Inicialização e Uso de clientes e servidores.**
 Importante: os servidores devem sempre ser iniciados antes dos clientes que se conectam a eles! Além disso, os servidores devem ser iniciados em portas diferentes, assim como os clientes!
 
 #### **Servidores**
 Há duas formas de iniciar os servidores. A primeira é executando o servidor na porta padrão, que é a **50051**. Para isso basta executar o seguinte comando na raiz do projeto:
 ```
-$ python3 server.py
+$ sh server.sh
 ```
 Caso seja de desejo do usuário executar um servidor em uma porta específica, basta executar o seguinte comando (substituindo "PORTA" pelo número da porta desejada):
 ```
-$ python3 server.py PORTA
+$ sh server.sh PORTA
 ```
 Após isso, os servidor(es) estadão disponíveis e oferecendo os serviços de acordo com as especificações do projeto.
 
 #### **Clientes**
 Há duas formas, também, de iniciar os clientes. A primeira é executando o cliente conectado no servidor da porta padrão, que é a **50051**. Para isso basta executar o seguinte comando na raiz do projeto:
 ```
-$ python3 client.py
+$ sh client.sh
 ```
 Caso seja de desejo do usuário executar um cliente que seja conectado a um outro servidor de uma porta específica, basta executar o seguinte comando (substituindo "PORTA" pelo número da porta do servidor desejado):
 ```
-$ python3 client.py PORTA
+$ sh client.sh PORTA
 ```
 Após isso, os clientes(es) estarão disponíveis e oferecendo os serviços de acordo com as especificações do projeto.
 
