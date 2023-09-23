@@ -57,7 +57,7 @@ def subscribe(client: mqtt_client):
         
         if mensagem[0] == "UPDATE_KEY":
             value = mensagem[3]
-            version = int(mensagem[6])
+            version = int(mensagem[6]) if str(mensagem[6]) != 'None' else None
             valuesList = valuesList = list(cache_dictionary[key]) if key in cache_dictionary else []
             valuesList.append((value, version)) 
             cache_dictionary[key] = valuesList
@@ -83,7 +83,7 @@ class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
             print("ta em cache")
             
             valores = cache_dictionary[chave]
-            versao_request = valores[-1][1]+1
+            versao_request = valores[-1][1]+1 if isinstance(valores[-1][1], (int, float)) else 1
             valor_request = valores[-1][0]
 
 
@@ -174,9 +174,10 @@ class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
         chave = request.key
         if chave in cache_dictionary:
             valores = cache_dictionary[chave]
-            cache_dictionary[chave] = [valores[-1]]
-            versao = valores[-1][1]
+            versao = None
             valor = valores[-1][0]
+            self.Del(request,context)
+            publish(client, f"UPDATE_KEY-{chave}-TO-{valor}-VALUE-IN-{versao}-VERSION")
             resposta = project_pb2.KeyValueVersionReply(
                     key=chave, val=valor, ver=versao
                 )
