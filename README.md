@@ -70,7 +70,7 @@ Foram implementados todos os requisitos de acordo com as especificações do pro
 }
 ```
 ### **Vídeo de exemplo do funcionamento do projeto**
-...
+Para assistir ao vídeo mostrando o funcionamento do projeto e o atendimento dos requisitos basta [clicar aqui](https://www.youtube.com/watch?v=v-qcq7t14eU)
 
 ### **Refeências**
 - [Web Article: GRPC Quick start
