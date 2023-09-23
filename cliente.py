@@ -1,57 +1,63 @@
+import sys
 import grpc
 import project_pb2
 import project_pb2_grpc
 
-def Put(message):
-    channel = grpc.insecure_channel('localhost:50051')
+def Put(message, port):
+    channel = grpc.insecure_channel('localhost:' + port)
     stub = project_pb2_grpc.KeyValueStoreStub(channel)
     response = stub.Put(message)
     return response
 
-def Get(message):
-    channel = grpc.insecure_channel('localhost:50051')
-    stub = project_pb2_grpc.KeyValueStoreStub(channel)
-    response = stub.Get(message)
-    return response
+def Get(message, port):
+    try:
+        channel = grpc.insecure_channel('localhost:' + port)
+        stub = project_pb2_grpc.KeyValueStoreStub(channel)
+        response = stub.Get(message)
+        return response
+    except Exception as erro:
+        print(f'Erro: {erro}')
+        return []
 
-def Del(message):
-    channel = grpc.insecure_channel('localhost:50051')
+
+def Del(message, port):
+    channel = grpc.insecure_channel('localhost:' + port)
     stub = project_pb2_grpc.KeyValueStoreStub(channel)
     response = stub.Del(message)
     return response
 
-def PutAll(message):
-    channel = grpc.insecure_channel('localhost:50051')
+def PutAll(message, port):
+    channel = grpc.insecure_channel('localhost:' + port)
     stub = project_pb2_grpc.KeyValueStoreStub(channel)
     response = list(stub.PutAll(iter(message)))
     return response
 
-def GetAll(message):
-    channel = grpc.insecure_channel('localhost:50051')
+def GetAll(message, port):
+    channel = grpc.insecure_channel('localhost:' + port)
     stub = project_pb2_grpc.KeyValueStoreStub(channel)
     response = list(stub.GetAll(iter(message)))
     return response
 
-def DelAll(message):
-    channel = grpc.insecure_channel('localhost:50051')
+def DelAll(message, port):
+    channel = grpc.insecure_channel('localhost:' + port)
     stub = project_pb2_grpc.KeyValueStoreStub(channel)
     response = list(stub.DelAll(iter(message)))
     return response
 
-def Trim(message):
-    channel = grpc.insecure_channel('localhost:50051')
+def Trim(message, port):
+    channel = grpc.insecure_channel('localhost:' + port)
     stub = project_pb2_grpc.KeyValueStoreStub(channel)
     response = stub.Trim(message)
     return response
 
-def GetRange(message):
-    channel = grpc.insecure_channel('localhost:50051')
+def GetRange(message, port):
+    channel = grpc.insecure_channel('localhost:' + port)
     stub = project_pb2_grpc.KeyValueStoreStub(channel)
     response = list(stub.GetRange(message))
     return response
 
-def DelRange(message):
-    channel = grpc.insecure_channel('localhost:50051')
+def DelRange(message, port):
+    channel = grpc.insecure_channel('localhost:' + port)
     stub = project_pb2_grpc.KeyValueStoreStub(channel)
     response = list(stub.DelRange(message))
     return response
@@ -103,6 +109,9 @@ def getManyKeysAndValuesFromUser():
     return keysAndValues
 
 if __name__ == '__main__':
+    port_ = '50051' if len(sys.argv) <= 1 else sys.argv[1]
+    print('Client started, conected to '+ port_+' port')
+    
     client_request = '-1'
     while client_request != '10':
         print('\n ------------------------------------ ')
@@ -127,7 +136,7 @@ if __name__ == '__main__':
         if client_request == '1': # Get
             key = getKeyFromUser()
             message = project_pb2.KeyRequest(key=key)
-            response = Get(message)
+            response = Get(message, port_)
             print()
             print(response)
         
@@ -135,7 +144,7 @@ if __name__ == '__main__':
             try:
                 print('Input two keys and values ​​below')
                 keysAndVersions = getManyKeysAndVersionsFromUser()
-                if(len(keysAndValues) != 2):
+                if(len(keysAndVersions) != 2):
                     print('Number of keys and velues must be 2! OPERATION ABORTED!')
                     break
                 
@@ -146,7 +155,7 @@ if __name__ == '__main__':
                     else:
                         messageFromTo.append(project_pb2.KeyRequest(key=key, ver=version))
                 message = project_pb2.KeyRange(fr=messageFromTo[0], to=messageFromTo[1])
-                response = GetRange(message)
+                response = GetRange(message, port_)
                 print(response)
             except ValueError as err:
                 print(f'Error: {err}')
@@ -162,7 +171,7 @@ if __name__ == '__main__':
                     else:
                         message = project_pb2.KeyRequest(key=key, ver=version)
                     steamgetall.append(message)
-                response = GetAll(steamgetall)
+                response = GetAll(steamgetall, port_)
                 print(response)
             except ValueError as err:
                 print(f'Error: {err}')
@@ -171,7 +180,7 @@ if __name__ == '__main__':
         elif client_request == '4': # Put
             key, value = getKeyAndValueFromUser()
             message = project_pb2.KeyValueRequest(key=key, val=value)
-            response = Put(message)
+            response = Put(message, port_)
             print()
             print(response)
         
@@ -182,7 +191,7 @@ if __name__ == '__main__':
                 for key, value in keysAndValues:
                     message = project_pb2.KeyValueRequest(key=key, val=value)
                     steamputall.append(message)
-                response = PutAll(steamputall)
+                response = PutAll(steamputall, port_)
                 print(response)
             except ValueError as err:
                 print(f'Error: {err}')
@@ -191,7 +200,7 @@ if __name__ == '__main__':
         elif client_request == '6': # Del
             key = getKeyFromUser()
             message = project_pb2.KeyRequest(key=key)
-            response = Del(message)
+            response = Del(message, port_)
             print()
             print(response)
         
@@ -199,7 +208,7 @@ if __name__ == '__main__':
             try:
                 print('Input two keys and values ​​below')
                 keysAndVersions = getManyKeysAndVersionsFromUser()
-                if(len(keysAndValues) != 2):
+                if(len(keysAndVersions) != 2):
                     print('Number of keys and velues must be 2! OPERATION ABORTED!')
                     break
                 
@@ -210,7 +219,7 @@ if __name__ == '__main__':
                     else:
                         messageFromTo.append(project_pb2.KeyRequest(key=key, ver=version))
                 message = project_pb2.KeyRange(fr=messageFromTo[0], to=messageFromTo[1])
-                response = DelRange(message)
+                response = DelRange(message, port_)
                 print(response)
             except ValueError as err:
                 print(f'Error: {err}')
@@ -223,7 +232,7 @@ if __name__ == '__main__':
                 for key in keys:
                     message = project_pb2.KeyRequest(key=key)
                     steamdelall.append(message)
-                response = DelAll(steamdelall)
+                response = DelAll(steamdelall, port_)
                 print(response)
             except ValueError as err:
                 print(f'Error: {err}')
@@ -232,7 +241,7 @@ if __name__ == '__main__':
         elif client_request == '9': # Trim
             key = getKeyFromUser()
             message = project_pb2.KeyRequest(key=key)
-            response = Trim(message)
+            response = Trim(message, port_)
             print()
             print(response)
         
