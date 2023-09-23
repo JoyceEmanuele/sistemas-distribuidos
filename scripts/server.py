@@ -20,7 +20,7 @@ from paho.mqtt import client as mqtt_client
 
 broker = 'broker.emqx.io'
 port = 1883
-topic = "python/key-vserions"
+topic = 'python/key-vserions'
 client_id = f'python-mqtt-{random.randint(0, 1000)}'
 
 cache_dictionary = LRUCache(maxsize=100)
@@ -28,9 +28,9 @@ cache_dictionary = LRUCache(maxsize=100)
 def connect_mqtt():
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
-            print("Connected to MQTT Broker!")
+            print('Connected to MQTT Broker!')
         else:
-            print("Failed to connect, return code %d\n", rc)
+            print('Failed to connect, return code %d\n', rc)
     # Set Connecting Client ID
     client = mqtt_client.Client(client_id)
     # client.username_pw_set(username, password)
@@ -43,24 +43,24 @@ def publish(client, msg):
     status = result[0]
 
     if status == 0:
-        print(f"Send `{msg}` to topic `{topic}`")
+        print(f'Send `{msg}` to topic `{topic}`')
     else:
-        print(f"Failed to send message to topic {topic}")
+        print(f'Failed to send message to topic {topic}')
 
 def subscribe(client: mqtt_client):    
     def on_message(client, userdata, msg):
-        print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
+        print(f'Received `{msg.payload.decode()}` from `{msg.topic}` topic')
         
-        mensagem = msg.payload.decode().split("-")
+        mensagem = msg.payload.decode().split('-')
         key = mensagem[1]
         
-        if mensagem[0] == "UPDATE_KEY":
+        if mensagem[0] == 'UPDATE_KEY':
             value = mensagem[3]
             version = int(mensagem[6]) if str(mensagem[6]) != 'None' else None
             valuesList = valuesList = list(cache_dictionary[key]) if key in cache_dictionary else []
             valuesList.append((value, version)) 
             cache_dictionary[key] = valuesList
-        if mensagem[0] == "DELETE_KEY":
+        if mensagem[0] == 'DELETE_KEY':
             del cache_dictionary[key]
 
         print('New cache')
@@ -87,7 +87,7 @@ class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
         print(request)
 
         if chave in cache_dictionary:
-            print("ta em cache")
+            print(f'{chave} is in cache')
             
             valores = cache_dictionary[chave]
             versao_request = timestamp_in_miliseconds()
@@ -100,19 +100,20 @@ class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
 
             print(cache_dictionary)
         else:
-            print("não ta em cache")
+            print(f'{chave} is not in cache')
             versao_request = timestamp_in_miliseconds()
             valores = []
             resposta = project_pb2.PutReply(
-                key=chave, old_val="", old_ver=0, ver=versao_request
+                key=chave, old_val='', old_ver=0, ver=versao_request
             )
             print(cache_dictionary)
-        publish(client, f"UPDATE_KEY-{chave}-TO-{valor}-VALUE-IN-{versao_request}-VERSION") 
+        publish(client, f'UPDATE_KEY-{chave}-TO-{valor}-VALUE-IN-{versao_request}-VERSION') 
         return resposta
     
     def Get(self, request, context):
-        print("get")
         chave = request.key
+        print(f'Get {chave} key')
+
         if chave in cache_dictionary:
             valores = cache_dictionary[chave]
             if(request.ver): 
@@ -132,11 +133,12 @@ class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
             
             return resposta
                 
-        else: print("chave não existe")
+        else: print('chave não existe')
 
     def Del(self, request, context):
-        print("get")
         chave = request.key
+        print(f'Get {chave} key')
+
         if chave in cache_dictionary:
             valores = cache_dictionary[chave]
             versao = valores[-1][1]
@@ -145,13 +147,13 @@ class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
                 key=chave, val=valor, ver=versao
             )
 
-            publish(client, f"DELETE_KEY-{chave}") 
+            publish(client, f'DELETE_KEY-{chave}') 
 
             return resposta
-        else: print("chave não existe")
+        else: print(f'{chave} does not exist')
 
     def PutAll(self, request, context):
-        print("PutAll")
+        print('PutAll')
         respostas = []
         for tupla in request:
             res = self.Put(tupla,context)
@@ -160,7 +162,7 @@ class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
         return iter(respostas)
     
     def GetAll(self, request, context):
-        print("GetAll")
+        print('GetAll')
         respostas = []
         for tupla in request:
             res = self.Get(tupla,context)
@@ -169,7 +171,7 @@ class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
         return iter(respostas)
     
     def DelAll(self, request, context):
-        print("DelAll")
+        print('DelAll')
         respostas = []
         for tupla in request:
             res = self.Del(tupla,context)
@@ -184,16 +186,16 @@ class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
             versao = None
             valor = valores[-1][0]
             self.Del(request,context)
-            publish(client, f"UPDATE_KEY-{chave}-TO-{valor}-VALUE-IN-{versao}-VERSION")
+            publish(client, f'UPDATE_KEY-{chave}-TO-{valor}-VALUE-IN-{versao}-VERSION')
             resposta = project_pb2.KeyValueVersionReply(
                     key=chave, val=valor, ver=versao
                 )
             print(cache_dictionary)
             return resposta
-        else: print("chave não existe")
+        else: print(f'{chave} does not exist')
     
     def GetRange(self, request, context):
-        print("GetRange")
+        print('GetRange')
 
         chavefr = request.fr.key
         chaveto = request.to.key
@@ -227,7 +229,7 @@ class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
         return iter(respostas)
     
     def DelRange(self, request, context):
-        print("DelRange")
+        print('DelRange')
 
         chavefr = request.fr.key
         chaveto = request.to.key
