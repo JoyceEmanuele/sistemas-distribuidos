@@ -95,7 +95,7 @@ class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
 
 
             resposta = project_pb2.PutReply(
-                key=chave, old_val=valor_request, old_ver=versao_request, ver=versao_request
+                key=chave, old_val=valor_request, old_ver= valores[-1][1], ver=versao_request
             )
 
             print(cache_dictionary)

@@ -71,6 +71,11 @@ def getKeyFromUser():
     key = input('Input the key: ')
     return key
 
+def getKeyFromUserVer():
+    key = input('Input the key: ')
+    ver = input('Input the values (use -1 to no version): ')
+    return (key,ver)
+
 def getManyKeysFromUser():
     key = input('Input the keys separated by space: ')
     return list(key.split(' '))
@@ -134,8 +139,11 @@ if __name__ == '__main__':
         print()
 
         if client_request == '1': # Get
-            key = getKeyFromUser()
-            message = project_pb2.KeyRequest(key=key)
+            key,ver = getKeyFromUserVer()
+            if ver == '-1': message = project_pb2.KeyRequest(key=key)
+            else:
+                message= project_pb2.KeyRequest(key=key,ver=int(ver))
+
             response = Get(message, port_)
             print()
             print(response)
