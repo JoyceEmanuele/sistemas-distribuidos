@@ -69,8 +69,8 @@ Foram implementados todos os requisitos de acordo com as especificações do pro
     'chaveK': [(valor1, versão1), ..., (valorP, versãoP)],
 }
 ```
-### **Vídeo de exemplo do funcionamento do projeto**
-Para assistir ao vídeo mostrando o funcionamento do projeto e o atendimento dos requisitos basta [clicar aqui](https://www.youtube.com/watch?v=v-qcq7t14eU)
+### **Vídeo do funcionamento do projeto e documento de testes**
+Para assistir ao vídeo mostrando o funcionamento do projeto e o atendimento dos requisitos basta [clicar aqui](https://www.youtube.com/watch?v=v-qcq7t14eU). Para acessar o documento contendo os testes realizados no projeto basta [clicar aqui](https://github.com/JoyceEmanuele/sistemas-distribuidos/blob/main/testes-projeto-sd.pdf) ou acessar o PDF na raiz do projeto.
 
 ### **Refeências**
 - [Web Article: GRPC Quick start
