@@ -44,10 +44,6 @@ def timestamp_in_miliseconds():
     return timestamp_in_miliseconds
 
 class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
-    # def __init__(self):
-    #     # Inicialize o cache de tabela hash (substitua o tamanho conforme necessário)
-    #     self.cache = LRUCache(maxsize=100)
-
     def __init__(self) -> None:
         self.socket = setReplica()
 
