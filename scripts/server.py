@@ -9,66 +9,10 @@ from cachetools import LRUCache
 from concurrent import futures
 
 
-# # mqtt needed imports
 import json
 import random
 import socket
 
-# import logging
-
-# from paho.mqtt import client as mqtt_client
-
-
-# # Create an MQTT Connection
-
-# broker = 'broker.emqx.io'
-# port = 1883
-# topic = 'python/key-vserions'
-# client_id = f'python-mqtt-{random.randint(0, 1000)}'
-
-
-# def connect_mqtt():
-#     def on_connect(client, userdata, flags, rc):
-#         if rc == 0:
-#             print('Connected to MQTT Broker!')
-#         else:
-#             print('Failed to connect, return code %d\n', rc)
-#     # Set Connecting Client ID
-#     client = mqtt_client.Client(client_id)
-#     # client.username_pw_set(username, password)
-#     client.on_connect = on_connect
-#     client.connect(broker, port)
-#     return client
-
-# def publish(client, msg):
-#     result = client.publish(topic, msg)
-#     status = result[0]
-
-#     if status == 0:
-#         print(f'Send `{msg}` to topic `{topic}`')
-#     else:
-#         print(f'Failed to send message to topic {topic}')
-
-# def subscribe(client: mqtt_client):    
-#     def on_message(client, userdata, msg):
-#         print(f'Received `{msg.payload.decode()}` from `{msg.topic}` topic')
-        
-#         mensagem = msg.payload.decode().split('-')
-#         key = mensagem[1]
-        
-#         if mensagem[0] == 'UPDATE_KEY':
-#             value = mensagem[3]
-#             version = int(mensagem[6]) if str(mensagem[6]) != 'None' else None
-#             valuesList = valuesList = list(cache_dictionary[key]) if key in cache_dictionary else []
-#             valuesList.append((value, version)) 
-#             cache_dictionary[key] = valuesList
-#         if mensagem[0] == 'DELETE_KEY':
-#             del cache_dictionary[key]
-
-#         print('New cache')
-#         print(cache_dictionary)
-#     client.subscribe(topic)
-#     client.on_message = on_message
 
 global socketDB
 
@@ -221,32 +165,32 @@ class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
                 key=chave, val=valor, ver=versao
             )
 
-    def PutAll(self, request, context):
-        print('PutAll')
-        respostas = []
-        for tupla in request:
-            res = self.Put(tupla,context)
-            respostas.append(res)
-        # print(cache_dictionary)
-        return iter(respostas)
+    # def PutAll(self, request, context):
+    #     print('PutAll')
+    #     respostas = []
+    #     for tupla in request:
+    #         res = self.Put(tupla,context)
+    #         respostas.append(res)
+    #     # print(cache_dictionary)
+    #     return iter(respostas)
     
-    def GetAll(self, request, context):
-        print('GetAll')
-        respostas = []
-        for tupla in request:
-            res = self.Get(tupla,context)
-            respostas.append(res)
-        # print(cache_dictionary)
-        return iter(respostas)
+    # def GetAll(self, request, context):
+    #     print('GetAll')
+    #     respostas = []
+    #     for tupla in request:
+    #         res = self.Get(tupla,context)
+    #         respostas.append(res)
+    #     # print(cache_dictionary)
+    #     return iter(respostas)
     
-    def DelAll(self, request, context):
-        print('DelAll')
-        respostas = []
-        for tupla in request:
-            res = self.Del(tupla,context)
-            respostas.append(res)
-        # print(cache_dictionary)
-        return iter(respostas)
+    # def DelAll(self, request, context):
+    #     print('DelAll')
+    #     respostas = []
+    #     for tupla in request:
+    #         res = self.Del(tupla,context)
+    #         respostas.append(res)
+    #     # print(cache_dictionary)
+    #     return iter(respostas)
     
     # def Trim(self, request, context):
     #     chave = request.key
@@ -329,12 +273,8 @@ def serve(port_):
     
 
 if __name__ == '__main__':
-    # logging.basicConfig()
 
     port_ = '50051' if len(sys.argv) <= 1 else sys.argv[1]
 
     server = serve(port_)
-    # client = connect_mqtt()
-    # client.loop_start()
-    # subscribe(client)
     server.wait_for_termination()
