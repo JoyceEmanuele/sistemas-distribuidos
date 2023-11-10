@@ -185,6 +185,8 @@ Etapa 2 - Banco de dados Replicado
 
 Nesta etapa você modificará o sistema para que atualizações dos dados sejam feitas persistente e consistentemente entre todas as réplicas usando um protocolo de difusão atômica.
 
+![Projeto](projeto.drawio-1.svg)
+
 * Objetivos
     * Replicar a base de dados para obter tolerância a falhas.
 
