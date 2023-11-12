@@ -62,7 +62,11 @@ class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
         except:
             print(f'Erro ao consultar chave')
             return None
-            
+
+        if resposta.get('data') is None:
+            print(f'Erro ao inserir chave')
+            return None 
+        
         if resposta['data'] != '':
             valores = resposta['data']
             versao_request = timestamp_in_miliseconds()
@@ -81,7 +85,7 @@ class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
 
         else:
             versao_request = timestamp_in_miliseconds()
-           
+
             msg = json.dumps({'function':'insert', 'key':chave, 'value':[(valor, versao_request)]})
             socket.send(msg.encode())
             resposta = socket.recv(2048)
@@ -89,8 +93,7 @@ class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
             return project_pb2.PutReply(
                 key=chave, old_val='', old_ver=0, ver=versao_request
             )
-        
-    
+
     def Get(self, request, context):
         chave = request.key
         print(f'Get {chave} key')
@@ -108,6 +111,11 @@ class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
             return None
         
         print(resposta)
+
+        if resposta.get('data') is None:
+            print(f'Erro ao consultar chave')
+            return None 
+    
         if resposta['data'] == '':
             print(f'Chave \'{chave}\' não existe')
         else:
@@ -148,7 +156,6 @@ class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
                 key='', val='', ver=0
             )
         else:
-            print('AAAAAAAAA')
             valores = resposta['data']
             versao = valores[-1][1]
             valor = valores[-1][0]
@@ -161,102 +168,154 @@ class KeyValueStore(project_pb2_grpc.KeyValueStoreServicer):
                 key=chave, val=valor, ver=versao
             )
 
-    # def PutAll(self, request, context):
-    #     print('PutAll')
-    #     respostas = []
-    #     for tupla in request:
-    #         res = self.Put(tupla,context)
-    #         respostas.append(res)
-    #     # print(cache_dictionary)
-    #     return iter(respostas)
+    def PutAll(self, request, context):
+        print('PutAll')
+        respostas = []
+        for tupla in request:
+            res = self.Put(tupla,context)
+            respostas.append(res)
+        return iter(respostas)
     
-    # def GetAll(self, request, context):
-    #     print('GetAll')
-    #     respostas = []
-    #     for tupla in request:
-    #         res = self.Get(tupla,context)
-    #         respostas.append(res)
-    #     # print(cache_dictionary)
-    #     return iter(respostas)
-    
-    # def DelAll(self, request, context):
-    #     print('DelAll')
-    #     respostas = []
-    #     for tupla in request:
-    #         res = self.Del(tupla,context)
-    #         respostas.append(res)
-    #     # print(cache_dictionary)
-    #     return iter(respostas)
-    
-    # def Trim(self, request, context):
-    #     chave = request.key
-    #     if chave in cache_dictionary:
-    #         valores = cache_dictionary[chave]
-    #         versao = None
-    #         valor = valores[-1][0]
-    #         self.Del(request,context)
-    #         publish(client, f'UPDATE_KEY-{chave}-TO-{valor}-VALUE-IN-{versao}-VERSION')
-    #         resposta = project_pb2.KeyValueVersionReply(
-    #                 key=chave, val=valor, ver=versao
-    #             )
-    #         print(cache_dictionary)
-    #         return resposta
-    #     else: print(f'{chave} does not exist')
-    
-    # def GetRange(self, request, context):
-    #     print('GetRange')
+    def GetAll(self, request, context):
+        print('GetAll')
 
-    #     chavefr = request.fr.key
-    #     chaveto = request.to.key
-    #     versaofr = request.fr.ver
-    #     versaoto = request.to.ver
+        respostas = []
 
-    #     if versaofr >= versaoto: versao = versaofr
-    #     else: versao = versaoto
-
-    #     chaves_ordenadas = sorted(cache_dictionary.keys())
-    #     print(chaves_ordenadas)
-
-    #     respostas = []
-
-    #     for chave in chaves_ordenadas:
-    #         if chave >= chavefr and chave <= chaveto:
-    #             valores = cache_dictionary[chave]
-    #             if not versao: 
-    #                 resposta = project_pb2.KeyValueVersionReply(
-    #                      key=chave, val=valores[-1][0], ver=valores[-1][1]
-    #                     )
-    #                 respostas.append(resposta)
-    #             else: 
-    #                 for valor, valor_versao in reversed(valores):
-    #                     if valor_versao <= versao:
-    #                         resposta = project_pb2.KeyValueVersionReply(
-    #                         key=chave, val=valor, ver=valor_versao
-    #                         )
-    #                         respostas.append(resposta)
+        maiorver = 0
+        tuplas = []
+        for tupla in request:
+            if maiorver < tupla.ver:
+                maiorver = tupla.ver
+            tuplas.append(tupla)
         
-    #     return iter(respostas)
+        for tupla in tuplas:
+            if tupla.ver:
+                socket = None
+                socket = self.socket
+                msg = json.dumps({'function':'read', 'key':tupla.key, 'value':None})
+                try:
+                    socket.send(msg.encode())
+                    resposta = socket.recv(2048)
+                    resposta = json.loads(resposta.decode())
+                except:
+                    print(f'Erro ao consultar chave')
+                    return None
+                print(resposta)
+                for valor, valor_versao in reversed(resposta['data']):
+                        if valor_versao <= maiorver:
+                            resposta = project_pb2.KeyValueVersionReply(
+                            key=tupla.key, val=valor, ver=valor_versao
+                            )
+                            respostas.append(resposta)
+            else:
+                res = self.Get(tupla,context)
+                respostas.append(res)
+        return iter(respostas)
     
-    # def DelRange(self, request, context):
-    #     print('DelRange')
+    def DelAll(self, request, context):
+        print('DelAll')
+        respostas = []
+        for tupla in request:
+            res = self.Del(tupla,context)
+            respostas.append(res)
+        return iter(respostas)
+    
+    def Trim(self, request, context):
+        chave = request.key
+        chaveresponse = project_pb2.KeyRequest(key=chave)
+        res = self.Get(chaveresponse,context)
+        if res != None:
 
-    #     chavefr = request.fr.key
-    #     chaveto = request.to.key
+            versao = res.ver
+            valor = res.val
 
-    #     chaves_ordenadas = sorted(cache_dictionary.keys())
-    #     print(chaves_ordenadas)
+            self.Del(chaveresponse,context)
 
-    #     respostas = []
+            socket = self.socket
+            msg = json.dumps({'function':'insert', 'key':chave, 'value': [(valor, versao)]})
+            socket.send(msg.encode())
 
-    #     for chave in chaves_ordenadas:
-    #         if chave >= chavefr and chave <= chaveto:
-    #             mensagem = project_pb2.KeyRequest(key=chave)
-    #             resposta = self.Del(mensagem,context)
-    #             respostas.append(resposta)
+            return res
+        else: print(f'{chave} nao existe')
+    
+    def GetRange(self, request, context):
+        print('GetRange')
 
-    #     print(cache_dictionary)
+        socket = None
+        socket = self.socket
         
-    #     return iter(respostas)
+        msg = json.dumps({'function':'get_all_data', 'key':None, 'value':None})
+        try:
+            socket.send(msg.encode())
+            resposta = socket.recv(2048)
+            respostabanco = json.loads(resposta.decode())
+            print(respostabanco)
+        except:
+            print(f'Erro ao executar o getrange das chave')
+            return None
+
+        chavefr = request.fr.key
+        chaveto = request.to.key
+        versaofr = request.fr.ver
+        versaoto = request.to.ver
+
+        if versaofr >= versaoto: versao = versaofr
+        else: versao = versaoto
+
+        chaves_ordenadas = sorted(respostabanco['all_data'])
+
+        respostas = []
+        
+        for chave in chaves_ordenadas:
+            if chave >= chavefr and chave <= chaveto:
+                valores = respostabanco['all_data'][chave]
+                print(valores)
+                if not versao: 
+                    resposta = project_pb2.KeyValueVersionReply(
+                    key=chave, val=valores[-1][0], ver=valores[-1][1]
+                    )
+                    respostas.append(resposta)
+                else: 
+                    for valor, valor_versao in reversed(valores):
+                        if valor_versao <= versao:
+                            resposta = project_pb2.KeyValueVersionReply(
+                            key=chave, val=valor, ver=valor_versao
+                            )
+                            respostas.append(resposta)
+        
+        return iter(respostas)
+
+    def DelRange(self, request, context):
+        print('DelRange')
+
+        socket = None
+        socket = self.socket
+        
+        msg = json.dumps({'function':'get_all_keys', 'key':None, 'value':None})
+        try:
+            socket.send(msg.encode())
+            resposta = socket.recv(2048)
+            respostabanco = json.loads(resposta.decode())
+            print(respostabanco)
+        except:
+            print(f'Erro ao executar o getrange das chave')
+            return None
+
+        chavefr = request.fr.key
+        chaveto = request.to.key
+
+        chaves_ordenadas = sorted(respostabanco['all_data'])
+        print(chaves_ordenadas)
+
+        respostas = []
+
+        for chave in chaves_ordenadas:
+            if chave >= chavefr and chave <= chaveto:
+                mensagem = project_pb2.KeyRequest(key=chave)
+                resposta = self.Del(mensagem,context)
+                respostas.append(resposta)
+        
+        return iter(respostas)
 
 def serve(port_):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))

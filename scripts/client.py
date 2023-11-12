@@ -6,8 +6,12 @@ import project_pb2_grpc
 def Put(message, port):
     channel = grpc.insecure_channel('localhost:' + port)
     stub = project_pb2_grpc.KeyValueStoreStub(channel)
-    response = stub.Put(message)
-    return response
+    try:
+        response = stub.Put(message)
+        return response
+    except:
+        print(f'Erro ao inserir chave')
+        return None
 
 def Get(message, port):
     try:
@@ -16,7 +20,7 @@ def Get(message, port):
         response = stub.Get(message)
         return response
     except Exception as erro:
-        print(f'Erro: {erro}')
+        print(f'ocorreu um erro na consulta ou chave vazia')
         return []
 
 
@@ -215,17 +219,13 @@ if __name__ == '__main__':
         elif client_request == '7': # Del Range
             try:
                 print('Input two keys and values ​​below')
-                keysAndVersions = getManyKeysAndVersionsFromUser()
-                if(len(keysAndVersions) != 2):
+                keys = getManyKeysFromUser()
+                if(len(keys) != 2):
                     print('Number of keys and velues must be 2! OPERATION ABORTED!')
                     break
-                
                 messageFromTo = []
-                for key, version in keysAndVersions:
-                    if version == -1:
-                        messageFromTo.append(project_pb2.KeyRequest(key=key))
-                    else:
-                        messageFromTo.append(project_pb2.KeyRequest(key=key, ver=version))
+                for key in keys:
+                    messageFromTo.append(project_pb2.KeyRequest(key=key))
                 message = project_pb2.KeyRange(fr=messageFromTo[0], to=messageFromTo[1])
                 response = DelRange(message, port_)
                 print(response)

@@ -36,6 +36,16 @@ def funcoesBanco(replica, conn, addr):
             replica.deleteData(key)
             resp = json.dumps({'msg': "Delete realizado com sucesso."})
 
+        if functionName == 'get_all_data':
+            response = replica.get_all_data()
+            print(response)
+            resp = json.dumps({'all_data': response})
+
+        if functionName == 'get_all_keys':
+            response = replica.get_all_keys()
+            print(response)
+            resp = json.dumps({'all_data': response})
+
 
         conn.send(resp.encode())
 

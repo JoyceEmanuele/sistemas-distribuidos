@@ -29,3 +29,19 @@ class Database(SyncObj):
         resp = '' if not respBytes else respBytes.decode()
         db.close()
         return resp
+    
+    def get_all_keys(self):
+        db = plyvel.DB(self.database, create_if_missing=True)
+        keys = [key.decode() for key, _ in db.iterator()]
+        db.close()
+        return keys
+    
+    def get_all_data(self):
+        db = plyvel.DB(self.database, create_if_missing=True)
+        all_data = {}
+        for key, value in db:
+            key_str = key.decode()
+            value_str = value.decode()
+            all_data[key_str] = json.loads(value_str)
+        db.close()
+        return all_data
