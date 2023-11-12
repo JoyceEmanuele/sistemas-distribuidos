@@ -143,7 +143,7 @@ Foram implementados todos os requisitos de acordo com as especificações do pro
 }
 ```
 ### **Vídeo do funcionamento do projeto e documento de testes**
-Para assistir ao vídeo mostrando o funcionamento do projeto e o atendimento dos requisitos basta [clicar aqui](https://drive.google.com/file/d/1sLpBK0MYKQdR0Dlm_ge1SvTlE2DWu-zx/view?usp=sharing). Para acessar o documento contendo os testes realizados no projeto basta [clicar aqui](https://github.com/JoyceEmanuele/sistemas-distribuidos/blob/main/Sistemas distribuídos - parte 2.pdf) ou acessar o PDF na raiz do projeto.
+Para assistir ao vídeo mostrando o funcionamento do projeto e o atendimento dos requisitos basta [clicar aqui](https://drive.google.com/file/d/1sLpBK0MYKQdR0Dlm_ge1SvTlE2DWu-zx/view?usp=sharing). Para acessar o documento contendo os testes realizados no projeto basta [clicar aqui](https://github.com/JoyceEmanuele/sistemas-distribuidos/blob/main/Sistemas-distribuídos-parte2.pdf) ou acessar o PDF na raiz do projeto.
 
 ### **Refeências**
 - [Web Article: GRPC Quick start
